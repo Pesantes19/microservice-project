@@ -1,0 +1,34 @@
+services:
+  auth-service:
+    build:
+      context: ./auth-service  # Ruta donde está el Dockerfile del servicio de autenticación
+    ports:
+      - "3001:3001"  # Mapea el puerto 3001 del contenedor al puerto 3001 del host
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/auth-db  # URI de MongoDB
+      - JWT_SECRET=mi_clave_secreta  # Secreta para JWT
+      - PORT=3001  # Puerto en el que el servicio escucha
+    depends_on:
+      - mongo  # Espera que MongoDB esté listo antes de iniciar el servicio
+
+  product-service:
+    build:
+      context: ./product-service  # Ruta donde está el Dockerfile del servicio de productos
+    ports:
+      - "3002:3002"  # Mapea el puerto 3002 del contenedor al puerto 3002 del host
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/product-db  # URI de MongoDB
+      - JWT_SECRET=mi_clave_secreta  # Secreta para JWT
+      - PORT=3002  # Puerto en el que el servicio escucha
+    depends_on:
+      - auth-service  # Espera que el servicio de autenticación esté listo
+
+  mongo:
+    image: mongo:latest  # Usamos la imagen oficial de MongoDB
+    ports:
+      - "27017:27017"  # Mapea el puerto 27017 del contenedor al puerto 27017 del host
+    volumes:
+      - mongo-data:/data/db  # Volumen persistente para MongoDB
+
+volumes:
+  mongo-data:  # Volumen persistente para almacenar los datos de MongoDB
